@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.location.ActivityRecognitionResult;
 import com.google.android.gms.location.DetectedActivity;
@@ -18,11 +19,9 @@ import java.util.List;
  */
 
 public class ActivityRecognizedService extends IntentService {
-    private int mCurrentActivity;
 
     public ActivityRecognizedService() {
         super("ActivityRecognizedService");
-        mCurrentActivity = DetectedActivity.UNKNOWN;
     }
 
     public ActivityRecognizedService(String name) {
@@ -42,7 +41,7 @@ public class ActivityRecognizedService extends IntentService {
             switch( activity.getType() ) {
                 case DetectedActivity.IN_VEHICLE: {
                     Log.e( "ActivityRecogition", "In Vehicle: " + activity.getConfidence() );
-                    if(activity.getConfidence() >= 70 && mCurrentActivity != DetectedActivity.IN_VEHICLE){
+                    if(activity.getConfidence() >= 70){
                         Intent intent = new Intent();
                         Date activityStarted = new Date();
                         intent.putExtra("timeStarted", activityStarted.getTime());
@@ -50,14 +49,13 @@ public class ActivityRecognizedService extends IntentService {
 
                         intent.setAction("com.mylesspencertyler.ACTIVITY_INTENT");
                         sendBroadcast(intent);
-                        mCurrentActivity = DetectedActivity.IN_VEHICLE;
                     }
                     break;
                 }
 
                 case DetectedActivity.RUNNING: {
                     Log.e( "ActivityRecogition", "Running: " + activity.getConfidence() );
-                    if(activity.getConfidence() >= 70 && mCurrentActivity != DetectedActivity.RUNNING){
+                    if(activity.getConfidence() >= 70){
                         Intent intent = new Intent();
                         Date activityStarted = new Date();
                         intent.putExtra("timeStarted", activityStarted.getTime());
@@ -70,7 +68,7 @@ public class ActivityRecognizedService extends IntentService {
                 }
                 case DetectedActivity.STILL: {
                     Log.e("ActivityRecogition", "Still: " + activity.getConfidence());
-                    if(activity.getConfidence() >= 70 && mCurrentActivity != DetectedActivity.STILL){
+                    if(activity.getConfidence() >= 70){
                         Intent intent = new Intent();
                         Date activityStarted = new Date();
                         intent.putExtra("timeStarted", activityStarted.getTime());
@@ -83,7 +81,7 @@ public class ActivityRecognizedService extends IntentService {
                 }
                 case DetectedActivity.WALKING: {
                     Log.e( "ActivityRecogition", "Walking: " + activity.getConfidence() );
-                    if(activity.getConfidence() >= 70 && mCurrentActivity != DetectedActivity.WALKING){
+                    if(activity.getConfidence() >= 70){
                         Intent intent = new Intent();
                         Date activityStarted = new Date();
                         intent.putExtra("timeStarted", activityStarted.getTime());
@@ -96,7 +94,7 @@ public class ActivityRecognizedService extends IntentService {
                 }
                 case DetectedActivity.UNKNOWN: {
                     Log.e( "ActivityRecogition", "Unknown: " + activity.getConfidence() );
-                    if(activity.getConfidence() >= 70 && mCurrentActivity != DetectedActivity.UNKNOWN){
+                    if(activity.getConfidence() >= 70){
                         Intent intent = new Intent();
                         Date activityStarted = new Date();
                         intent.putExtra("timeStarted", activityStarted.getTime());
