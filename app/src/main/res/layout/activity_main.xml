@@ -13,16 +13,5 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        android:id="@+id/textView" />
-
-    <TextView
-        android:text="Test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/textView"
-        android:layout_alignParentStart="true"
-        android:layout_marginStart="51dp"
-        android:layout_marginTop="82dp"
-        android:id="@+id/textView2" />
+        android:text="Hello World!" />
 </RelativeLayout>
