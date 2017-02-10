@@ -33,7 +33,7 @@ public class ActivityTimeDbHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
-    public void setActivityType(String activityType) {
+    public void setActivityType(String activityType, String startTime) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
