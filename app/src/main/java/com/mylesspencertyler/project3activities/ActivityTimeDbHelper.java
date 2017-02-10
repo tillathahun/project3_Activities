@@ -38,6 +38,7 @@ public class ActivityTimeDbHelper extends SQLiteOpenHelper {
 
         ContentValues values = new ContentValues();
         values.put(ActivityTimeContract.TimeEntry.ACTIVITY_TYPE, activityType);
+        values.put(ActivityTimeContract.TimeEntry.START_TIME, startTime);
 
         this.lastEntryId = db.insert(ActivityTimeContract.TimeEntry.TABLE_NAME, null, values);
     }

@@ -20,7 +20,7 @@ public class ActivityTimeContract {
                 "CREATE TABLE " + TimeEntry.TABLE_NAME + " (" +
                 TimeEntry._ID + " INTEGER PRIMARY KEY," +
                 TimeEntry.ACTIVITY_TYPE + " TEXT," +
-                TimeEntry.START_TIME + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
+                TimeEntry.START_TIME + " TEXT)";
         public static final String SQL_DELETE_TABLE =
                 "DROP TABLE IF EXISTS " + TimeEntry.TABLE_NAME;
     }
