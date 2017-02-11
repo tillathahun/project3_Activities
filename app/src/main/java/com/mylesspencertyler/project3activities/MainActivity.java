@@ -108,6 +108,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+            } catch (IntentSender.SendIntentException e) {
+                //e.printStackTrace();
+            }
+        } else {
+            //Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (mGoogleApiClient.isConnected()) {
@@ -129,26 +143,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onConnected(@Nullable Bundle bundle) {
         Intent intent = new Intent( this, ActivityRecognizedService.class );
         PendingIntent pendingIntent = PendingIntent.getService( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT );
-<<<<<<< HEAD
+
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mGoogleApiClient, 3000, pendingIntent );
-=======
-        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mApiClient, 3000, pendingIntent );
 
-        //Log.i(TAG, "Location services connected.");
-
-        if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
-            mMap.setMyLocationEnabled(true);
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1600);
-
-        }
-        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-        //if (location == null) {
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        //}
-
-        handleNewLocation(location);
-    }
->>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
 
         if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1600);
@@ -163,24 +160,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-<<<<<<< HEAD
-    public void onConnectionSuspended(int i) {
-
-=======
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        if (connectionResult.hasResolution()) {
-            try {
-                // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-            } catch (IntentSender.SendIntentException e) {
-                //e.printStackTrace();
-            }
-        } else {
-            //Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
-        }
->>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
-    }
-
+    public void onConnectionSuspended(int i) {}
 
     private void updateUI(ActivityType result, long timeStarted) {
         // Insert into database
@@ -257,10 +237,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
-<<<<<<< HEAD
+//<<<<<<< HEAD
 
-=======
->>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
+//=======
+//>>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
         MarkerOptions options = new MarkerOptions()
