@@ -30,6 +30,8 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     private ActivityType mCurrentActivity;
     private TextView activity;
 
+    private AudioActionPlayer mediaPlayer = new AudioActionPlayer();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,6 +71,18 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        mediaPlayer.stop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mediaPlayer.stop();
+    }
+
+    @Override
     public void onConnected(@Nullable Bundle bundle) {
         Intent intent = new Intent( this, ActivityRecognizedService.class );
         PendingIntent pendingIntent = PendingIntent.getService( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT );
@@ -93,6 +107,14 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
         activity.setText(result.name().toLowerCase());
     }
 
+    private void handleMusic(ActivityType result) {
+        if(result == ActivityType.RUNNING || result == ActivityType.WALKING) {
+            mediaPlayer.play(this);
+        } else {
+            mediaPlayer.stop();
+        }
+    }
+
     private class ActivityBroadcastReceiver extends BroadcastReceiver {
 
         @Override
@@ -107,6 +129,8 @@ public class MainActivity extends Activity implements GoogleApiClient.Connection
                 mCurrentActivity = result;
                 updateUI(result, timeStarted);
             }
+
+            handleMusic(result);
         }
     }
 }
