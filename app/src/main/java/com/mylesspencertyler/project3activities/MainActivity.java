@@ -21,6 +21,25 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Vibrator;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.os.Bundle;
+import android.widget.TextView;
+import android.widget.Toast;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
+import com.google.android.gms.location.DetectedActivity;
+import com.mylesspencertyler.project3activities.service.activityrecognition.ActivityRecognizedService;
+import java.text.SimpleDateFormat;
+
+
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
 
@@ -28,6 +47,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private LocationRequest mLocationRequest;
+
+    public GoogleApiClient mApiClient;
+    boolean mIsReceiverRegistered = false;
+    ActivityBroadcastReceiver mReceiver = null;
+    private ActivityType mCurrentActivity;
+    private TextView activity;
 
 
     private void handleNewLocation(Location location) {
@@ -47,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+	// Head
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
@@ -65,6 +91,82 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setMaxWaitTime(1)
                 .setFastestInterval(0)
                 .setSmallestDisplacement(0);
+	// =====
+
+        mApiClient = new GoogleApiClient.Builder(this)
+                .addApi(ActivityRecognition.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        mApiClient.connect();
+
+        mCurrentActivity = ActivityType.UNKNOWN;
+        activity = (TextView) findViewById(R.id.activity_textview);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!mIsReceiverRegistered) {
+            if (mReceiver == null)
+                mReceiver = new ActivityBroadcastReceiver();
+            registerReceiver(mReceiver, new IntentFilter("com.mylesspencertyler.ACTIVITY_INTENT"));
+            mIsReceiverRegistered = true;
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mIsReceiverRegistered) {
+            unregisterReceiver(mReceiver);
+            mReceiver = null;
+            mIsReceiverRegistered = false;
+        }
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Intent intent = new Intent( this, ActivityRecognizedService.class );
+        PendingIntent pendingIntent = PendingIntent.getService( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT );
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mApiClient, 3000, pendingIntent );
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
+    private void updateUI(ActivityType result, long timeStarted) {
+        // here we update the image, throw a toast
+        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
+        String formattedDate = df.format(timeStarted);
+        Toast.makeText(this, formattedDate, Toast.LENGTH_SHORT).show();
+        activity.setText(result.name().toLowerCase());
+    }
+
+    private class ActivityBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            ActivityType result = ActivityType.detachFrom(intent);
+            long timeStarted = intent.getLongExtra("timeStarted", -1);
+
+            if(result != mCurrentActivity) {
+                Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                // Vibrate for 500 milliseconds
+                v.vibrate(500);
+                mCurrentActivity = result;
+                updateUI(result, timeStarted);
+            }
+        }
+	// master
     }
 
 
