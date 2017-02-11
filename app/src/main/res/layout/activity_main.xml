@@ -22,11 +22,11 @@
         tools:context="com.example.spencer.maptest.MapsActivity"
         android:layout_height="350dp" />
 
-</LinearLayout>
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Activity listed here..."
         android:id="@+id/activity_textview"/>
+</LinearLayout>
+
 </RelativeLayout>

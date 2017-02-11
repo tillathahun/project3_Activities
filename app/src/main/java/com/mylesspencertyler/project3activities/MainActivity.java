@@ -43,7 +43,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
     private LocationRequest mLocationRequest;
 
-    public GoogleApiClient mApiClient;
     boolean mIsReceiverRegistered = false;
     ActivityBroadcastReceiver mReceiver = null;
     private ActivityType mCurrentActivity;
@@ -77,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
+                .addApi(ActivityRecognition.API)
                 .build();
 
         // Create the LocationRequest object
@@ -88,14 +88,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .setSmallestDisplacement(0);
 	// =====
 
-        mApiClient = new GoogleApiClient.Builder(this)
-                .addApi(ActivityRecognition.API)
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
-        mApiClient.connect();
-
         mCurrentActivity = ActivityType.UNKNOWN;
         activity = (TextView) findViewById(R.id.activity_textview);
         ActivityTime.setContext(getBaseContext());
@@ -104,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onResume() {
         super.onResume();
+        mGoogleApiClient.connect();
         if (!mIsReceiverRegistered) {
             if (mReceiver == null)
                 mReceiver = new ActivityBroadcastReceiver();
@@ -117,6 +110,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     protected void onPause() {
         super.onPause();
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
         if (mIsReceiverRegistered) {
             unregisterReceiver(mReceiver);
             mReceiver = null;
@@ -132,6 +129,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void onConnected(@Nullable Bundle bundle) {
         Intent intent = new Intent( this, ActivityRecognizedService.class );
         PendingIntent pendingIntent = PendingIntent.getService( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT );
+<<<<<<< HEAD
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mGoogleApiClient, 3000, pendingIntent );
+=======
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mApiClient, 3000, pendingIntent );
 
         //Log.i(TAG, "Location services connected.");
@@ -148,13 +148,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         handleNewLocation(location);
     }
+>>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
 
-    @Override
-    public void onConnectionSuspended(int i) {
+        if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1600);
 
+        }
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        //if (location == null) {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        //}
+
+        handleNewLocation(location);
     }
 
     @Override
+<<<<<<< HEAD
+    public void onConnectionSuspended(int i) {
+
+=======
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         if (connectionResult.hasResolution()) {
             try {
@@ -166,7 +178,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         } else {
             //Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
         }
+>>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
     }
+
 
     private void updateUI(ActivityType result, long timeStarted) {
         // Insert into database
@@ -243,6 +257,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+<<<<<<< HEAD
+
+=======
+>>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
         MarkerOptions options = new MarkerOptions()
