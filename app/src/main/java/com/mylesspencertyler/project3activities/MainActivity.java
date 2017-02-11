@@ -1,16 +1,26 @@
 package com.mylesspencertyler.project3activities;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.ActivityRecognition;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -20,23 +30,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import android.app.Activity;
-import android.app.PendingIntent;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.os.Vibrator;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.os.Bundle;
-import android.widget.TextView;
-import android.widget.Toast;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.location.ActivityRecognition;
-import com.google.android.gms.location.DetectedActivity;
 import com.mylesspencertyler.project3activities.service.activityrecognition.ActivityRecognizedService;
+
 import java.text.SimpleDateFormat;
 
 
@@ -107,6 +102,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             registerReceiver(mReceiver, new IntentFilter("com.mylesspencertyler.ACTIVITY_INTENT"));
             mIsReceiverRegistered = true;
         }
+        //setUpMap();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -121,13 +118,36 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mReceiver = null;
             mIsReceiverRegistered = false;
         }
+        if (mGoogleApiClient.isConnected()) {
+            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            mGoogleApiClient.disconnect();
+        }
     }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Intent intent = new Intent( this, ActivityRecognizedService.class );
         PendingIntent pendingIntent = PendingIntent.getService( this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT );
+<<<<<<< HEAD
         ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mGoogleApiClient, 3000, pendingIntent );
+=======
+        ActivityRecognition.ActivityRecognitionApi.requestActivityUpdates( mApiClient, 3000, pendingIntent );
+
+        //Log.i(TAG, "Location services connected.");
+
+        if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+            mMap.setMyLocationEnabled(true);
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1600);
+
+        }
+        Location location = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        //if (location == null) {
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        //}
+
+        handleNewLocation(location);
+    }
+>>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
 
         if(ContextCompat.checkSelfPermission(this,android.Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 1600);
@@ -142,8 +162,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
+<<<<<<< HEAD
     public void onConnectionSuspended(int i) {
 
+=======
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+            } catch (IntentSender.SendIntentException e) {
+                //e.printStackTrace();
+            }
+        } else {
+            //Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+        }
+>>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
     }
 
 
@@ -195,26 +229,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 7983dbba6f3a4f6d690e7d9b0b099029dc014687
     private void setUpMap() {
         mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
         MarkerOptions options = new MarkerOptions()
                 .position(new LatLng(0,0))
                 .title("I am here!");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        if (connectionResult.hasResolution()) {
-            try {
-                // Start an Activity that tries to resolve the error
-                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
-            } catch (IntentSender.SendIntentException e) {
-                //e.printStackTrace();
-            }
-        } else {
-            //Log.i(TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
-        }
     }
 
     @Override
