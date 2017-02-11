@@ -33,7 +33,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.mylesspencertyler.project3activities.service.activityrecognition.ActivityRecognizedService;
 
 import java.text.SimpleDateFormat;
-
+import java.util.Date;
 
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, LocationListener {
@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mCurrentActivity = ActivityType.UNKNOWN;
         activity = (TextView) findViewById(R.id.activity_textview);
+        ActivityTime.setContext(getBaseContext());
     }
 
     @Override
@@ -168,11 +169,38 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void updateUI(ActivityType result, long timeStarted) {
-        // here we update the image, throw a toast
-        SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
-        String formattedDate = df.format(timeStarted);
-        Toast.makeText(this, formattedDate, Toast.LENGTH_SHORT).show();
-        activity.setText(result.name().toLowerCase());
+        // Insert into database
+        new ActivityTime(result.name().toLowerCase());
+        ActivityTime last = ActivityTime.getLastActivityTime();
+        Date current = new Date(timeStarted);
+        long diff = current.getTime() - last.getStartTime().getTime();
+        long diffSecs = diff / 1000 % 60;
+        long diffMins = diff / (60 * 1000) % 60;
+
+        String text = "";
+        switch (last.getActivityType()) {
+            case "walking":
+                text = "You walked for ";
+                break;
+            case "running":
+                text = "You were running for ";
+                break;
+            case "vehicle":
+                text = "You were in a vehicle for ";
+                break;
+            case "still":
+                text = "You were standing still for ";
+                break;
+            default:
+                text = "You were doing something unknown for ";
+
+        }
+
+        text = text + diffMins + ":" + diffSecs;
+
+        activity.setText(text);
+        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
+
     }
 
     private class ActivityBroadcastReceiver extends BroadcastReceiver {
